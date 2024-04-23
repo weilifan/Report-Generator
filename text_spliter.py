@@ -22,7 +22,7 @@ class TextSplitter:
 
 
 if __name__ == '__main__':
-    dir = "folder1"
+    dir = "D:/BaiduNetdiskDownload/Code/database1/txt"
     name = "小米汽车"
     text_spliter = TextSplitter(dir, name)
     print(text_spliter.contents)
