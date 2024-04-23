@@ -27,4 +27,7 @@ if __name__ == '__main__':
     ques = "你好"
     chat_model = ChatModel(key)
     ans = chat_model.get_ans(ques)
-    print(ans)
+    result = [""]
+    for trunk in ans:
+        result[-1] += trunk.choices[0].delta.content
+    print(result)
