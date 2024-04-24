@@ -1,0 +1,12 @@
+transformers~=4.39.2
+sentence-transformers~=2.2.0
+langchain-community~=0.0.31
+langchain-text-splitters~=0.0.1
+zhipuai~=2.0.1
+pymilvus~=2.4.0
+faiss-cpu~=1.7.4
+gradio~=4.27.0
+pypinyin~=0.51.0
+tqdm~=4.62.3
+pandas~=2.0.3
+jieba~=0.42.1
