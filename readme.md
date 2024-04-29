@@ -9,6 +9,7 @@
       - 参考文件需要是txt格式。文件夹中还需要包含一个xlsx大纲文件。 
       - 不对知识库文件夹名称做规定，本程序会使用自动在文档中提取关键词来给知识库命名 
       - 如果上传的文件夹名称提取出的关键词为已存在知识库，那么会在已存在知识库中追加写入
+    - 如果文档中很细节的问题无法被召回，可在构建向量数据库前先运行`database/data_aug.py`，使用角色扮演的方法对数据做增强
 2. 部署和使用
     - 安装`requirements.txt`中的所有依赖
     - 将智谱AI的key放在`main.py`的`zhipu_key = "key"`中，申请智谱AI的key：`https://open.bigmodel.cn/usercenter/apikeys`
