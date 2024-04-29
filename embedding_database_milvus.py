@@ -1,12 +1,12 @@
-from pymilvus import MilvusClient, CollectionSchema, FieldSchema, DataType
+from pymilvus import MilvusClient, CollectionSchema, FieldSchema, DataType, connections
 from pypinyin import lazy_pinyin
 from embedding_model import EmbModel
 from tqdm import tqdm
 
 
 class EmbDatabase:
-    def __init__(self, client, emb_dir, contents, name):
-        self.client = client
+    def __init__(self, uri, emb_dir, contents, name):
+        self.client = MilvusClient(uri=uri)
         self.name = "_".join(lazy_pinyin(name))
         self.emb_model = EmbModel(emb_dir)
 
@@ -33,7 +33,7 @@ class EmbDatabase:
 
             for idx, content in tqdm(enumerate(contents), total=len(contents), desc=f"构建{name}向量库中"):
                 emb = self.emb_model.to_emb(content)[0]
-                client.insert(self.name, {"id": idx, "text": content, "emb": emb})
+                self.client.insert(self.name, {"id": idx, "text": content, "emb": emb})
 
         self.client.load_collection(self.name)
 
@@ -48,12 +48,12 @@ class EmbDatabase:
 
 
 if __name__ == '__main__':
-    client = MilvusClient(uri="https://hz-t2.matpool.com:27863")
+    uri = "http://123.249.96.84:19530"
     emb_dir = "m3e-base"
     contents = ["牡丹鹦鹉又称为情侣鹦鹉、爱情鸟，是牡丹鹦鹉属内所有鹦鹉的总称", "分为三类，分别是1.费氏牡丹鹦鹉我们俗称：头类牡丹鹦鹉", "2.桃脸牡丹鹦鹉俗称：面类牡丹鹦鹉",
                 "3.头类和面类的后代俗称：骡子。"]
     name = "牡丹鹦鹉"
     ques = "情侣鹦鹉、爱情鸟"
-    emb_database = EmbDatabase(client, emb_dir, contents, name)
+    emb_database = EmbDatabase(uri, emb_dir, contents, name)
     ans = emb_database.search(ques)
     print(ans)
