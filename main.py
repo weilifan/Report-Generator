@@ -1,5 +1,4 @@
 import gradio as gr
-import pandas as pd
 import os
 import shutil
 import jieba.analyse as aly
@@ -30,13 +29,13 @@ class Interface:
         result2 = []
 
         result1.append("内容解析中......")
-        yield "\n".join(result1), "\n".join(result2)
+        yield "\n".join(result1), "\n".join(result2), "report.txt"
 
         all_report = ""
         for p_n, group in database.prompt_data.groupby("段落"):
             result1.append(f"第{p_n}段内容生成中......")
 
-            yield "\n".join(result1), "\n".join(result2)
+            yield "\n".join(result1), "\n".join(result2), "report.txt"
 
             p_n_content = []
             for question in group["prompt"]:
@@ -50,19 +49,19 @@ class Interface:
                 result1.append("检索及回答内容:\n")
                 for trunk in response:
                     result1[-1] += trunk.choices[0].delta.content
-                    yield "\n".join(result1), "\n".join(result2)
+                    yield "\n".join(result1), "\n".join(result2), "report.txt"
 
                 result1[-1] = result1[-1].replace("\n", "")
                 p_n_content.append(result1[-1])
 
                 result1.append("*" * 30)
-                yield "\n".join(result1), "\n".join(result2)
+                yield "\n".join(result1), "\n".join(result2), "report.txt"
 
             prompt_report = f"你是一个大学教授，你需要根据相关内容，来撰写一段内容，生成的结果必须严格来自相关内容，语言必须严谨、符合事实，不能使用第一人称，相关内容如下：\n```\n{''.join(p_n_content)}\n```\n生成的结果为："
 
-            result1.append("第一段报告内容:\n")
-            result2.append("\t\t\t")
-            yield "\n".join(result1), "\n".join(result2)
+            result1.append(f"第{p_n}段报告内容:\n")
+            result2.append("\t")
+            yield "\n".join(result1), "\n".join(result2), "report.txt"
 
             response = self.chat.get_ans(prompt_report)
 
@@ -72,13 +71,15 @@ class Interface:
 
                 result1[-1] = result1[-1].replace("\n", "")
                 result2[-1] = result2[-1].replace("\n", "")
-                yield "\n".join(result1), "\n".join(result2)
+                yield "\n".join(result1), "\n".join(result2), "report.txt"
 
             all_report += result2[-1]
             all_report += "\n"
 
+            with open("report.txt", "w", encoding="utf-8") as file:
+                file.write(all_report)
             result1.append("*" * 30)
-            yield "\n".join(result1), "\n".join(result2)
+            yield "\n".join(result1), "\n".join(result2), "report.txt"
 
     def question_answering(self, name, text):
         database = self.database_list[database_namelist.index(name)]
@@ -149,7 +150,7 @@ class Interface:
 
 if __name__ == '__main__':
     dir_path = "database"
-    zhipu_key = ""  # 在此处粘贴智谱AI的key
+    zhipu_key = "8f6719730949b29a490ca66be2596ecb.Hwp1SS55b9ildI5B"  # 在此处粘贴智谱AI的key
     dirs = [name for name in os.listdir(dir_path) if os.path.isdir(f"{dir_path}/{name}")]
 
     database_list = []
@@ -179,7 +180,18 @@ if __name__ == '__main__':
 
     functions = Interface(dir_path=dir_path, api_key=zhipu_key)
 
-    interface1 = gr.Interface(functions.report_generation, [input1, input3, input2], [output1, output2],
+    filename = "report.txt"
+
+    if os.path.exists(filename):
+        os.remove(filename)
+        print(f"Existing '{filename}' has been deleted.")
+
+    with open(filename, 'w') as file:
+        print(f"New '{filename}' has been created.")
+
+    interface1 = gr.Interface(functions.report_generation,
+                              [input1, input3, input2],
+                              [output1, output2, gr.File(label="下载文档", value="report.txt")],
                               submit_btn="生成报告",
                               clear_btn=gr.Button("clear", visible=False),
                               allow_flagging="never")
@@ -193,4 +205,4 @@ if __name__ == '__main__':
     with tab_interface as tab_interface:
         input1.change(functions.database_change, input1, input2)
         input3.upload(functions.upload, input3, [input1, input2])
-        tab_interface.queue().launch(server_name="127.0.0.1", server_port=9996, show_api=False)
+        tab_interface.queue().launch(server_name="127.0.0.1", server_port=9999, show_api=False)
